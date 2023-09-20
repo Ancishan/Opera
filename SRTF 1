@@ -1,0 +1,69 @@
+#include <stdio.h>
+#include <limits.h>
+
+int main() {
+  int n;
+  printf("Enter the number of processes: ");
+  scanf("%d", &n);
+
+  // Declare arrays to store the process information
+  int arrival_times[n];
+  int burst_times[n];
+  int remaining_times[n];
+  int completion_times[n];
+  int turnaround_times[n];
+  int waiting_times[n];
+
+  // Initialize the process information
+  for (int i = 0; i < n; i++) {
+    printf("Enter the arrival time and burst time for process P%d: ", i + 1);
+    scanf("%d %d", &arrival_times[i], &burst_times[i]);
+    remaining_times[i] = burst_times[i];
+  }
+
+  // Schedule the processes using SRTF
+  int current_time = 0;
+  int completed = 0;
+  while (completed < n) {
+    // Find the process with the shortest remaining time
+    int min_remaining_time = INT_MAX;
+    int min_remaining_time_index = -1;
+    for (int i = 0; i < n; i++) {
+      if (arrival_times[i] <= current_time &&
+          remaining_times[i] < min_remaining_time &&
+          remaining_times[i] > 0) {
+        min_remaining_time = remaining_times[i];
+        min_remaining_time_index = i;
+      }
+    }
+
+    // If there is no process with the shortest remaining time, then wait
+    if (min_remaining_time_index == -1) {
+      current_time++;
+      continue;
+    }
+
+    // Schedule the process with the shortest remaining time
+    remaining_times[min_remaining_time_index]--;
+
+    // If the process has completed, then update its completion time, turnaround time, and waiting time
+    if (remaining_times[min_remaining_time_index] == 0) {
+      completion_times[min_remaining_time_index] = current_time + 1;
+      turnaround_times[min_remaining_time_index] = completion_times[min_remaining_time_index] - arrival_times[min_remaining_time_index];
+      waiting_times[min_remaining_time_index] = turnaround_times[min_remaining_time_index] - burst_times[min_remaining_time_index];
+      completed++;
+    }
+
+    // Update the current time
+    current_time++;
+  }
+
+  // Print the results
+  printf("Process ID | Arrival Time | Burst Time | Completion Time | Turnaround Time | Waiting Time\n");
+  for (int i = 0; i < n; i++) {
+    printf("%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n", i + 1, arrival_times[i],
+           burst_times[i], completion_times[i], turnaround_times[i], waiting_times[i]);
+  }
+
+  return 0;
+}
